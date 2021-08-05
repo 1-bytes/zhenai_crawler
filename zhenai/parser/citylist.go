@@ -7,6 +7,7 @@ import (
 
 const cityListRe = `<a href="(https?://[\w:/.]+)"[^>]*>([^<]+)</a>`
 
+// ParseCityList 城市列表解析器.
 func ParseCityList(contents []byte) engine.ParseResult {
 	re := regexp.MustCompile(cityListRe)
 	matches := re.FindAllSubmatch(contents, -1)

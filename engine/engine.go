@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// Run 爬虫核心调度引擎.
 func Run(seeds ...Request) {
 	var (
 		requests []Request
