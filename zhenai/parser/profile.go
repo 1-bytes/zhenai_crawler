@@ -21,8 +21,9 @@ var houseRe = regexp.MustCompile(`<td><span class="label">住房条件：</span>
 var carRe = regexp.MustCompile(`<td><span class="label">是否购车：</span><span field="">([^<]+)</span></td>`)
 
 // ParseProfile 用户信息解析器.
-func ParseProfile(contents []byte) engine.ParseResult {
+func ParseProfile(contents []byte, name string) engine.ParseResult {
 	profile := model.Profile{}
+	profile.Name = name
 	profile.Age = extractInt(contents, ageRe)
 	profile.Height = extractInt(contents, heightRe)
 	profile.Weight = extractInt(contents, weightRe)

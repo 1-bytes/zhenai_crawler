@@ -13,7 +13,7 @@ type ParseResult struct {
 }
 
 // NilParser 开发过程中临时使用的占位函数.
-func NilParser([]byte) ParseResult {
+func NilParser(_ []byte) ParseResult {
 	return ParseResult{
 		Requests: nil,
 		Items:    nil,
