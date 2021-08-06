@@ -11,9 +11,15 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
+// 爬取速度控制.
+var rateLimiter = time.NewTicker(10 * time.Millisecond)
+
+// Fetch 发起请求爬取内容.
 func Fetch(url string) ([]byte, error) {
+	<-rateLimiter.C
 	var resp, err = http.Get(url)
 	if err != nil {
 		return nil, err
@@ -31,7 +37,7 @@ func Fetch(url string) ([]byte, error) {
 	return ioutil.ReadAll(utf8Reader)
 }
 
-// determineEncoding 确定网页当前的编码格式
+// determineEncoding 确定网页当前的编码格式.
 func determineEncoding(r *bufio.Reader) encoding.Encoding {
 	bytes, err := r.Peek(1024)
 	if err != nil {
