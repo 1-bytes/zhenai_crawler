@@ -2,6 +2,7 @@ package engine
 
 import (
 	"crawler/fetcher"
+	"crawler/model"
 	"log"
 )
 
@@ -21,7 +22,7 @@ type ReadyNotifier interface {
 	WorkerReady(chan Request)
 }
 
-// Run 并发版Engine.
+// Run 并发版 engine.
 func (e *ConcurrentEngine) Run(seeds ...Request) {
 	out := make(chan ParseResult)
 	e.Scheduler.Run()
@@ -30,24 +31,34 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 	}
 
 	for _, r := range seeds {
+		if isDuplicate(r.URL) {
+			continue
+		}
 		e.Scheduler.Submit(r)
 	}
 
-	itemCount := 0
+	profileCount := 0
 	for {
 		result := <-out
 		for _, item := range result.Items {
-			log.Printf("Got item#%d: %v", itemCount, item)
-			itemCount++
+			if _, ok := item.(model.Profile); ok {
+				log.Printf("Got item#%d: %v", profileCount, item)
+				profileCount++
+			}
 		}
 
 		for _, request := range result.Requests {
+			// URL 去重
+			if isDuplicate(request.URL) {
+				continue
+			}
+
 			e.Scheduler.Submit(request)
 		}
 	}
 }
 
-// createWorker 创建一个worker.
+// createWorker 创建一个 worker.
 func (e *ConcurrentEngine) createWorker(in chan Request, out chan ParseResult, ready ReadyNotifier) {
 	go func() {
 		for {
@@ -71,4 +82,15 @@ func (e *ConcurrentEngine) worker(r Request) (ParseResult, error) {
 		return ParseResult{}, err
 	}
 	return r.ParserFunc(body), nil
+}
+
+var visitedURLs = make(map[string]bool)
+
+// isDuplicate 判断 url 是否重复 重复返回 true，不重复返回 false.
+func isDuplicate(url string) bool {
+	if visitedURLs[url] {
+		return true
+	}
+	visitedURLs[url] = true
+	return false
 }
