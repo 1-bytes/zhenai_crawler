@@ -1,12 +1,12 @@
 package engine
 
-// 抛给数据解析器的数据结构.
+// Request 抛给数据解析器的数据结构.
 type Request struct {
 	URL        string
 	ParserFunc func([]byte) ParseResult
 }
 
-// 解析器返回数据的结构.
+// ParseResult 解析器返回数据的结构.
 type ParseResult struct {
 	Requests []Request
 	Items    []interface{}

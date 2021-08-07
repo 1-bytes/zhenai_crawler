@@ -75,7 +75,7 @@ func (e *ConcurrentEngine) createWorker(in chan Request, out chan ParseResult, r
 
 // worker 任务处理程序，将 fetch 拿到的数据扔给指定的 parser 函数.
 func (e *ConcurrentEngine) worker(r Request) (ParseResult, error) {
-	log.Printf("Fetching %s", r.URL)
+	// log.Printf("Fetching %s", r.URL)
 	body, err := fetcher.Fetch(r.URL)
 	if err != nil {
 		log.Printf("Fetcher: error fetching url %s: %v", r.URL, err)
@@ -86,7 +86,7 @@ func (e *ConcurrentEngine) worker(r Request) (ParseResult, error) {
 
 var visitedURLs = make(map[string]bool)
 
-// isDuplicate 判断 url 是否重复 重复返回 true，不重复返回 false.
+// isDuplicate 简单去重，判断 url 是否重复 重复返回 true，不重复返回 false.
 func isDuplicate(url string) bool {
 	if visitedURLs[url] {
 		return true

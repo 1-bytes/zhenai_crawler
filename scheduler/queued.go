@@ -18,17 +18,17 @@ func (s *QueuedScheduler) WorkerChan() chan engine.Request {
 	return make(chan engine.Request)
 }
 
-// Submit 将 Request 加入到队列，等待出现空闲 Worker 的出现.
+// Submit 将 request 加入到队列，等待出现空闲 worker 的出现.
 func (s *QueuedScheduler) Submit(r engine.Request) {
 	s.requestChan <- r
 }
 
-// WorkerReady 将空闲的 Worker 加入到队列，准备 Request 的到来.
+// WorkerReady 将空闲的 worker 加入到队列，准备 request 的到来.
 func (s *QueuedScheduler) WorkerReady(w chan engine.Request) {
 	s.workerChan <- w
 }
 
-// Run 用来启动 Queue 版本的 Scheduler.
+// Run 用来启动 queue 版本的 scheduler.
 func (s *QueuedScheduler) Run() {
 	// 初始化 channel，用于接收即将到来的 Request 和 Worker
 	s.workerChan = make(chan chan engine.Request)
