@@ -6,15 +6,16 @@ import (
 
 //
 // QueuedScheduler
-// @Description: 各个 Worker 拥有自己的 channel 来实现的调度器
+// @Description: 各个 worker 拥有自己的 channel 来实现的调度器
 //
 type QueuedScheduler struct {
 	requestChan chan engine.Request
 	workerChan  chan chan engine.Request
 }
 
-func (s *QueuedScheduler) ConfigureMasterWorkerChan(_ chan engine.Request) {
-	panic("implement me")
+// WorkerChan 为每一个 worker 创建一个 channel
+func (s *QueuedScheduler) WorkerChan() chan engine.Request {
+	return make(chan engine.Request)
 }
 
 // Submit 将 Request 加入到队列，等待出现空闲 Worker 的出现.
