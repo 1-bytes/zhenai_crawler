@@ -19,6 +19,7 @@ var occupationRe = regexp.MustCompile(`<td><span class="label">职业：</span><
 var hukouRe = regexp.MustCompile(`<td><span class="label">籍贯：</span>([^<]+)</td>`)
 var houseRe = regexp.MustCompile(`<td><span class="label">住房条件：</span><span field="">([^<]+)</span></td>`)
 var carRe = regexp.MustCompile(`<td><span class="label">是否购车：</span><span field="">([^<]+)</span></td>`)
+var guessRe = regexp.MustCompile(`<a class="exp-user-name"[^>]* href="(https?://[\w:/.]+)[^>]*">([^<]*)</a>`)
 
 // ParseProfile 用户信息解析器.
 func ParseProfile(contents []byte, name string) engine.ParseResult {
@@ -36,10 +37,22 @@ func ParseProfile(contents []byte, name string) engine.ParseResult {
 	profile.Hokou = extractString(contents, hukouRe)
 	profile.House = extractString(contents, houseRe)
 	profile.Car = extractString(contents, carRe)
+	matches := guessRe.FindAllSubmatch(contents, -1)
 	result := engine.ParseResult{
-		Requests: nil,
-		Items:    []interface{}{profile},
+		Items: []interface{}{profile},
 	}
+
+	// 猜你喜欢
+	for _, m := range matches {
+		name := string(m[2])
+		result.Requests = append(result.Requests, engine.Request{
+			URL: string(m[1]),
+			ParserFunc: func(c []byte) engine.ParseResult {
+				return ParseProfile(c, name)
+			},
+		})
+	}
+
 	return result
 }
 
