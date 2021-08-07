@@ -2,6 +2,10 @@ package scheduler
 
 import "crawler/engine"
 
+//
+// SimpleScheduler
+// @Description: 多个 worker 公用一个 channel 来实现的调度器
+//
 type SimpleScheduler struct {
 	workerChan chan engine.Request
 }

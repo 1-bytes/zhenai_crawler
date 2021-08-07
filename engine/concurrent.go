@@ -13,15 +13,16 @@ type ConcurrentEngine struct {
 type Scheduler interface {
 	Submit(Request)
 	ConfigureMasterWorkerChan(chan Request)
+	WorkerReady(chan Request)
+	Run()
 }
 
 // Run 并发版Engine.
 func (e *ConcurrentEngine) Run(seeds ...Request) {
-	in := make(chan Request)
 	out := make(chan ParseResult)
-	e.Scheduler.ConfigureMasterWorkerChan(in)
+	e.Scheduler.Run()
 	for i := 0; i < e.WorkerCount; i++ {
-		e.createWorker(in, out)
+		e.createWorker(out, e.Scheduler)
 	}
 
 	for _, r := range seeds {
@@ -43,9 +44,11 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 }
 
 // createWorker 创建一个worker.
-func (e *ConcurrentEngine) createWorker(in chan Request, out chan ParseResult) {
+func (e *ConcurrentEngine) createWorker(out chan ParseResult, s Scheduler) {
+	in := make(chan Request)
 	go func() {
 		for {
+			s.WorkerReady(in)
 			request := <-in
 			result, err := e.worker(request)
 			if err != nil {
@@ -56,7 +59,7 @@ func (e *ConcurrentEngine) createWorker(in chan Request, out chan ParseResult) {
 	}()
 }
 
-// worker 。
+// worker 任务处理程序，将 fetch 拿到的数据扔给指定的 parser 函数.
 func (e *ConcurrentEngine) worker(r Request) (ParseResult, error) {
 	log.Printf("Fetching %s", r.URL)
 	body, err := fetcher.Fetch(r.URL)
