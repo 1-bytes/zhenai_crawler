@@ -2,13 +2,13 @@ package engine
 
 import (
 	"crawler/fetcher"
-	"crawler/model"
 	"log"
 )
 
 type ConcurrentEngine struct {
 	Scheduler   Scheduler
 	WorkerCount int
+	ItemChan    chan interface{}
 }
 
 type Scheduler interface {
@@ -37,14 +37,13 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		e.Scheduler.Submit(r)
 	}
 
-	profileCount := 0
 	for {
 		result := <-out
+		// 数据存储
 		for _, item := range result.Items {
-			if _, ok := item.(model.Profile); ok {
-				log.Printf("Got item#%d: %v", profileCount, item)
-				profileCount++
-			}
+			go func(item interface{}) {
+				e.ItemChan <- item
+			}(item)
 		}
 
 		for _, request := range result.Requests {
@@ -53,6 +52,7 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 				continue
 			}
 
+			// 提交至 request 队列，准备进入 worker 进一步处理
 			e.Scheduler.Submit(request)
 		}
 	}
