@@ -20,9 +20,10 @@ var hukouRe = regexp.MustCompile(`<td><span class="label">籍贯：</span>([^<]+
 var houseRe = regexp.MustCompile(`<td><span class="label">住房条件：</span><span field="">([^<]+)</span></td>`)
 var carRe = regexp.MustCompile(`<td><span class="label">是否购车：</span><span field="">([^<]+)</span></td>`)
 var guessRe = regexp.MustCompile(`<a class="exp-user-name"[^>]* href="(https?://[\w:/.]+)[^>]*">([^<]*)</a>`)
+var idURLRe = regexp.MustCompile(`^https?://[\w:/.]+/(\d+)$`)
 
 // ParseProfile 用户信息解析器.
-func ParseProfile(contents []byte, name string) engine.ParseResult {
+func ParseProfile(contents []byte, url string, name string) engine.ParseResult {
 	profile := model.Profile{}
 	profile.Name = name
 	profile.Age = extractInt(contents, ageRe)
@@ -39,16 +40,23 @@ func ParseProfile(contents []byte, name string) engine.ParseResult {
 	profile.Car = extractString(contents, carRe)
 	matches := guessRe.FindAllSubmatch(contents, -1)
 	result := engine.ParseResult{
-		Items: []interface{}{profile},
+		Items: []engine.Item{
+			{
+				URL:     url,
+				Id:      extractString([]byte(url), idURLRe),
+				Payload: profile,
+			},
+		},
 	}
 
 	// 猜你喜欢
 	for _, m := range matches {
+		url := string(m[1])
 		name := string(m[2])
 		result.Requests = append(result.Requests, engine.Request{
-			URL: string(m[1]),
+			URL: url,
 			ParserFunc: func(c []byte) engine.ParseResult {
-				return ParseProfile(c, name)
+				return ParseProfile(c, url, name)
 			},
 		})
 	}

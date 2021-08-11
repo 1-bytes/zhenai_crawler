@@ -1,14 +1,15 @@
 package persist
 
 import (
+	"crawler/engine"
 	"github.com/olivere/elastic/v7"
 	"golang.org/x/net/context"
 	"log"
 )
 
 // ItemSaver 用于存储 item.
-func ItemSaver() chan interface{} {
-	out := make(chan interface{})
+func ItemSaver() chan engine.Item {
+	out := make(chan engine.Item)
 	go func() {
 		itemCount := 0
 		for {
@@ -16,7 +17,7 @@ func ItemSaver() chan interface{} {
 			log.Printf("Item Saver: got item #%d: %v", itemCount, item)
 			itemCount++
 
-			_, err := save(item)
+			err := save(item)
 			if err != nil {
 				log.Printf("Item Saver: error saving item %v: %v", item, err)
 			}
@@ -26,17 +27,21 @@ func ItemSaver() chan interface{} {
 }
 
 // save 存储数据.
-func save(item interface{}) (id string, err error) {
+func save(item engine.Item) error {
 	client, err := elastic.NewClient(elastic.SetSniff(false))
 	if err != nil {
-		return "", err
+		return err
 	}
-	resp, err := client.Index().
+
+	indexService := client.Index().
 		Index("dating_profile_zhenai").
-		BodyJson(item).
-		Do(context.Background())
-	if err != nil {
-		return "", err
+		BodyJson(item)
+	if item.Id != "" {
+		indexService = indexService.Id(item.Id)
 	}
-	return resp.Id, nil
+	_, err = indexService.Do(context.Background())
+	if err != nil {
+		return err
+	}
+	return nil
 }
