@@ -1,27 +1,31 @@
 package engine
 
-// Request 抛给数据解析器的数据结构.
+type ParserFunc func(contents []byte, url string) ParseResult
+
+//
+// Request
+// @Description: 抛给数据解析器的数据结构.
+//
 type Request struct {
 	URL        string
-	ParserFunc func([]byte) ParseResult
+	ParserFunc ParserFunc
 }
 
-// ParseResult 解析器返回数据的结构.
+//
+// ParseResult
+// @Description: 解析器返回数据的结构.
+//
 type ParseResult struct {
 	Requests []Request
 	Items    []Item
 }
 
+//
+// Item
+// @Description: 通用模板 后续要存储数据的格式结构.
+//
 type Item struct {
 	URL     string
-	Id      string
+	ID      string
 	Payload interface{}
 }
-
-// NilParser 开发过程中临时使用的占位函数.
-// func NilParser(_ []byte) ParseResult {
-// 	return ParseResult{
-// 		Requests: nil,
-// 		Items:    nil,
-// 	}
-// }

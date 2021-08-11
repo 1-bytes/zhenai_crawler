@@ -9,10 +9,11 @@ import (
 	"testing"
 )
 
+// TestSave 测试数据存储.
 func TestSave(t *testing.T) {
 	expected := engine.Item{
 		URL: "http://localhost:8080/mock/album.zhenai.com/u/803409738748213657",
-		Id:  "803409738748213657",
+		ID:  "803409738748213657",
 		Payload: model.Profile{
 			Name:       "原来无话可说爱你",
 			Gender:     "女",
@@ -36,16 +37,17 @@ func TestSave(t *testing.T) {
 		panic(err)
 	}
 
+	const index = "dating_test"
 	// Save expected item
-	err = save(expected)
+	err = save(client, index, expected)
 	if err != nil {
 		panic(err)
 	}
 
 	// Fetch saved item
 	resp, err := client.Get().
-		Index("dating_profile_zhenai").
-		Id(expected.Id).
+		Index(index).
+		Id(expected.ID).
 		Do(context.Background())
 	if err != nil {
 		panic(err)

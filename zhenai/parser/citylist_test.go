@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-// TestParseCityList 城市列表解析器测试案例.
+// TestParseCityList 测试城市列表解析器.
 func TestParseCityList(t *testing.T) {
 	contents, err := ioutil.ReadFile("cityList_test_data.html")
 	if err != nil {
 		panic(err)
 	}
-	result := ParseCityList(contents)
+	result := ParseCityList(contents, "")
 
 	const resultSize = 470
 	expectedUrls := []string{

@@ -1,16 +1,19 @@
 package engine
 
-import (
-	"crawler/fetcher"
-	"log"
-)
-
+//
+// ConcurrentEngine
+// @Description: 并发版 Engine 基础管理套件.
+//
 type ConcurrentEngine struct {
 	Scheduler   Scheduler
 	WorkerCount int
-	ItemChan    chan interface{}
+	ItemChan    chan Item
 }
 
+//
+// Scheduler
+// @Description: 任务调度接口.
+//
 type Scheduler interface {
 	ReadyNotifier
 	Submit(Request)
@@ -18,6 +21,10 @@ type Scheduler interface {
 	Run()
 }
 
+//
+// ReadyNotifier
+// @Description: work 任务完成通知接口.
+//
 type ReadyNotifier interface {
 	WorkerReady(chan Request)
 }
@@ -41,7 +48,7 @@ func (e *ConcurrentEngine) Run(seeds ...Request) {
 		result := <-out
 		// 数据存储
 		for _, item := range result.Items {
-			go func(item interface{}) {
+			go func(item Item) {
 				e.ItemChan <- item
 			}(item)
 		}
@@ -64,24 +71,13 @@ func (e *ConcurrentEngine) createWorker(in chan Request, out chan ParseResult, r
 		for {
 			ready.WorkerReady(in)
 			request := <-in
-			result, err := e.worker(request)
+			result, err := worker(request)
 			if err != nil {
 				continue
 			}
 			out <- result
 		}
 	}()
-}
-
-// worker 任务处理程序，将 fetch 拿到的数据扔给指定的 parser 函数.
-func (e *ConcurrentEngine) worker(r Request) (ParseResult, error) {
-	// log.Printf("Fetching %s", r.URL)
-	body, err := fetcher.Fetch(r.URL)
-	if err != nil {
-		log.Printf("Fetcher: error fetching url %s: %v", r.URL, err)
-		return ParseResult{}, err
-	}
-	return r.ParserFunc(body), nil
 }
 
 var visitedURLs = make(map[string]bool)

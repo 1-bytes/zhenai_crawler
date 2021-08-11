@@ -2,6 +2,10 @@ package model
 
 import "encoding/json"
 
+//
+// Profile
+// @Description: 要爬取记录的用户基础信息
+//
 type Profile struct {
 	Name       string
 	Gender     string
@@ -18,6 +22,7 @@ type Profile struct {
 	Car        string
 }
 
+// FromJsonObj .
 func FromJsonObj(o interface{}) (Profile, error) {
 	var profile Profile
 	s, err := json.Marshal(o)

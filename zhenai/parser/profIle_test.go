@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// TestParseProfile 测试用户信息解析器.
 func TestParseProfile(t *testing.T) {
 	contents, err := ioutil.ReadFile("profile_test_data.html")
 	if err != nil {
@@ -22,7 +23,7 @@ func TestParseProfile(t *testing.T) {
 	actual := result.Items[0]
 	expected := engine.Item{
 		URL: "http://localhost:8080/mock/album.zhenai.com/u/803409738748213657",
-		Id:  "803409738748213657",
+		ID:  "803409738748213657",
 		Payload: model.Profile{
 			Name:       "原来无话可说爱你",
 			Gender:     "女",

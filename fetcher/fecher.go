@@ -12,12 +12,8 @@ import (
 	"net/http"
 )
 
-// 爬取速度控制.
-// var rateLimiter = time.NewTicker(10 * time.Millisecond)
-
 // Fetch 发起请求爬取内容.
 func Fetch(url string) ([]byte, error) {
-	// <-rateLimiter.C
 	var resp, err = http.Get(url)
 	if err != nil {
 		return nil, err

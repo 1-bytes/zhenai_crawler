@@ -43,7 +43,7 @@ func ParseProfile(contents []byte, url string, name string) engine.ParseResult {
 		Items: []engine.Item{
 			{
 				URL:     url,
-				Id:      extractString([]byte(url), idURLRe),
+				ID:      extractString([]byte(url), idURLRe),
 				Payload: profile,
 			},
 		},
@@ -51,13 +51,9 @@ func ParseProfile(contents []byte, url string, name string) engine.ParseResult {
 
 	// 猜你喜欢
 	for _, m := range matches {
-		url := string(m[1])
-		name := string(m[2])
 		result.Requests = append(result.Requests, engine.Request{
-			URL: url,
-			ParserFunc: func(c []byte) engine.ParseResult {
-				return ParseProfile(c, url, name)
-			},
+			URL:        string(m[1]),
+			ParserFunc: ProfileParser(string(m[2])),
 		})
 	}
 
@@ -80,4 +76,11 @@ func extractInt(contents []byte, re *regexp.Regexp) int {
 		return 0
 	}
 	return resultInt
+}
+
+// ProfileParser 向用户信息解析器内追加数据（对 ParserFunc 的封装）.
+func ProfileParser(name string) engine.ParserFunc {
+	return func(c []byte, url string) engine.ParseResult {
+		return ParseProfile(c, url, name)
+	}
 }
