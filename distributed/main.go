@@ -1,16 +1,18 @@
 package main
 
 import (
-	"crawler/distributed/config"
+	configs "crawler/distributed/config"
 	"crawler/distributed/persist/client"
 	"crawler/engine"
+	"crawler/pkg/config"
 	"crawler/scheduler"
 	"crawler/zhenai/parser"
 )
 
 // main 入口程序.
 func main() {
-	itemChan, err := client.ItemSaver(config.ItemSaverPort)
+	configs.Initialize()
+	itemChan, err := client.ItemSaver(":" + config.GetString("app.item_saver_port"))
 	if err != nil {
 		panic(err)
 	}

@@ -1,15 +1,18 @@
 package main
 
 import (
+	configs "crawler/distributed/config"
 	"crawler/engine"
 	"crawler/persist"
+	"crawler/pkg/config"
 	"crawler/scheduler"
 	"crawler/zhenai/parser"
 )
 
 // main 入口程序.
 func main() {
-	itemChan, err := persist.ItemSaver("dating_profile_zhenai")
+	configs.Initialize()
+	itemChan, err := persist.ItemSaver(config.GetString("elasticSearch.index"))
 	if err != nil {
 		panic(err)
 	}
