@@ -21,7 +21,7 @@ func ItemSaver(index string) (chan engine.Item, error) {
 			log.Printf("Item Saver: got item #%d: %v", itemCount, item)
 			itemCount++
 
-			err := save(client, index, item)
+			err := Save(client, index, item)
 			if err != nil {
 				log.Printf("Item Saver: error saving item %v: %v", item, err)
 			}
@@ -30,8 +30,8 @@ func ItemSaver(index string) (chan engine.Item, error) {
 	return out, nil
 }
 
-// save 将数据存储至 ElasticSearch.
-func save(client *elastic.Client, index string, item engine.Item) error {
+// Save 将数据存储至 ElasticSearch.
+func Save(client *elastic.Client, index string, item engine.Item) error {
 	indexService := client.Index().
 		Index(index).
 		BodyJson(item)
