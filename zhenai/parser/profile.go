@@ -22,8 +22,8 @@ var carRe = regexp.MustCompile(`<td><span class="label">是否购车：</span><s
 var guessRe = regexp.MustCompile(`<a class="exp-user-name"[^>]* href="(https?://[\w:/.]+)[^>]*">([^<]*)</a>`)
 var idURLRe = regexp.MustCompile(`^https?://[\w:/.]+/(\d+)$`)
 
-// ParseProfile 用户信息解析器.
-func ParseProfile(contents []byte, url string, name string) engine.ParseResult {
+// parseProfile 用户信息解析器.
+func parseProfile(contents []byte, url string, name string) engine.ParseResult {
 	profile := model.Profile{}
 	profile.Name = name
 	profile.Age = extractInt(contents, ageRe)
@@ -52,8 +52,8 @@ func ParseProfile(contents []byte, url string, name string) engine.ParseResult {
 	// 猜你喜欢
 	for _, m := range matches {
 		result.Requests = append(result.Requests, engine.Request{
-			URL:        string(m[1]),
-			ParserFunc: ProfileParser(string(m[2])),
+			URL:    string(m[1]),
+			Parser: NewProfileParser(string(m[2])),
 		})
 	}
 
@@ -78,9 +78,18 @@ func extractInt(contents []byte, re *regexp.Regexp) int {
 	return resultInt
 }
 
-// ProfileParser 向用户信息解析器内追加数据（对 ParserFunc 的封装）.
-func ProfileParser(name string) engine.ParserFunc {
-	return func(c []byte, url string) engine.ParseResult {
-		return ParseProfile(c, url, name)
-	}
+type ProfileParser struct {
+	userName string
+}
+
+func (p ProfileParser) Parse(contents []byte, url string) engine.ParseResult {
+	return parseProfile(contents, url, p.userName)
+}
+
+func (p ProfileParser) Serialize() (name string, args interface{}) {
+	return "ProfileParser", p.userName
+}
+
+func NewProfileParser(name string) *ProfileParser {
+	return &ProfileParser{userName: name}
 }

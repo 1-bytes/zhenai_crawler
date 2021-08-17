@@ -23,7 +23,7 @@ func main() {
 		ItemChan:    itemChan,
 	}
 	e.Run(engine.Request{
-		URL:        "http://127.0.0.1:8080/mock/www.zhenai.com/zhenghun",
-		ParserFunc: parser.ParseCityList,
+		URL:    "http://127.0.0.1:8080/mock/www.zhenai.com/zhenghun",
+		Parser: engine.NewFuncParser(parser.ParseCityList, "ParseCityList"),
 	})
 }
